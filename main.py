@@ -19,10 +19,10 @@ if __name__ == "__main__":
     training_series = perf_series.loc[perf_series.index < training_cutoff]
     test_series = perf_series.loc[perf_series.index >= training_cutoff]
 
-    x = process_inputs(training_series, 10)
-    y = process_targets(training_series)
+    x_series = process_inputs(training_series, window_length=10)
+    y_series = process_targets(training_series)
 
-    common_index = x.index.intersection(y.index)
-    x, y = x.loc[common_index], y.loc[common_index]
+    common_index = x_series.index.intersection(y_series.index)
+    x_series, y_series = x_series.loc[common_index], y_series.loc[common_index]
 
     print(x)
