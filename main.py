@@ -5,6 +5,7 @@ import pytz as pytz
 import yfinance as yf
 
 from model.preprocessors import process_inputs, process_targets
+from model.trainer import train
 
 if __name__ == "__main__":
     # spy = yf.Ticker("SPY")
@@ -19,10 +20,12 @@ if __name__ == "__main__":
     training_series = perf_series.loc[perf_series.index < training_cutoff]
     test_series = perf_series.loc[perf_series.index >= training_cutoff]
 
-    x_series = process_inputs(training_series, window_length=10)
-    y_series = process_targets(training_series)
+    training_x_series = process_inputs(training_series, window_length=10)
+    training_y_series = process_targets(training_series)
 
-    common_index = x_series.index.intersection(y_series.index)
-    x_series, y_series = x_series.loc[common_index], y_series.loc[common_index]
+    common_index = training_x_series.index.intersection(training_y_series.index)
+    training_x_series, training_y_series = training_x_series.loc[common_index], training_y_series.loc[common_index]
+
+    trained_model = train(training_x_series, training_y_series)
 
     print(x)
