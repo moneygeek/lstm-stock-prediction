@@ -1,14 +1,45 @@
 from functools import partial
 
+import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 
 from model.dataset import LSTMStocksDataset
 from model.model import LSTMStocksModule
+from matplotlib import pyplot as plt
+from scipy.stats import norm
 
 
-def train(x_series: pd.Series, y_series: pd.Series, epochs: int = 100):
+LEARNING_RATE = 1e-4
+WEIGHT_DECAY = 0.
+
+
+def _draw_chart(y_series: pd.Series):
+    y_series.plot.hist(bins=50, label='Target Returns')
+
+    # Draw Gaussian curve
+    mu, stdev = norm.fit(y_series)
+    xmin, xmax = plt.xlim()
+    x = np.linspace(xmin, xmax, 50)
+    p = norm.pdf(x, mu, stdev)
+    p *= y_series.shape[0] / p.sum()
+
+    plt.plot(x, p, 'k', linewidth=2, label='Gaussian Curve')
+    plt.legend()
+
+
+def chart_y_histogram(y_series: pd.Series):
+    _draw_chart(y_series)
+    plt.show()
+
+    _draw_chart(y_series)
+    xmin, _ = plt.xlim()
+    plt.axis([xmin, -0.015, 0, 10])
+    plt.show()
+
+
+def train(x_series: pd.Series, y_series: pd.Series, epochs: int = 200):
     # Put data into GPU if possible
     dataloader_kwargs = {}
     if torch.cuda.is_available():
@@ -25,10 +56,13 @@ def train(x_series: pd.Series, y_series: pd.Series, epochs: int = 100):
     if torch.cuda.is_available():
         model = model.cuda()
 
-    loss_func = partial(torch.nn.functional.huber_loss, delta=0.1)
+    loss_func = partial(torch.nn.functional.huber_loss, delta=0.02)
+    chart_y_histogram(y_series)
+
     optimizer = torch.optim.Adam(
         model.parameters(),
-        lr=1e-4
+        lr=LEARNING_RATE,
+        weight_decay=WEIGHT_DECAY
     )
 
     for i in range(epochs):
