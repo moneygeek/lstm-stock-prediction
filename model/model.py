@@ -6,7 +6,7 @@ class LSTMStocksModule(nn.Module):
     NUM_LAYERS = 1
     BIAS = True
 
-    def __init__(self, window_length: int):
+    def __init__(self):
         super(LSTMStocksModule, self).__init__()
         self.lstm = nn.LSTM(
             1,
@@ -16,7 +16,7 @@ class LSTMStocksModule(nn.Module):
             batch_first=True
         )
         if self.HIDDEN_SIZE > 1:
-            self.linear = nn.Linear(self.HIDDEN_SIZE, 1)
+            self.linear = nn.Linear(self.HIDDEN_SIZE, 1, bias=False)
 
     def forward(self, x):
         _, (hidden, cell) = self.lstm(x.unsqueeze(-1))

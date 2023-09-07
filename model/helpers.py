@@ -12,7 +12,7 @@ from scipy.stats import norm
 
 
 LEARNING_RATE = 1e-4
-WEIGHT_DECAY = 0.
+WEIGHT_DECAY = 1e-6
 
 
 def _draw_chart(y_series: pd.Series):
@@ -39,7 +39,7 @@ def chart_y_histogram(y_series: pd.Series):
     plt.show()
 
 
-def train(x_series: pd.Series, y_series: pd.Series, epochs: int = 200):
+def train(x_series: pd.Series, y_series: pd.Series, epochs: int = 100):
     # Put data into GPU if possible
     dataloader_kwargs = {}
     if torch.cuda.is_available():
@@ -47,13 +47,15 @@ def train(x_series: pd.Series, y_series: pd.Series, epochs: int = 200):
         dataloader_kwargs['generator'] = torch.Generator(device='cuda')
     else:
         torch.set_default_tensor_type('torch.FloatTensor')
+
+    # Turn pandas objects into Pytorch tensor objects
     x_tensor, y_tensor = torch.tensor(x_series.values).float(), torch.tensor(y_series.values).float()
 
     train_dataset = LSTMStocksDataset(x_tensor, y_tensor)
     train_dataloader = DataLoader(train_dataset, batch_size=64, shuffle=True, **dataloader_kwargs)
 
-    model = LSTMStocksModule(x_series.shape[1]).train()
-    if torch.cuda.is_available():
+    model = LSTMStocksModule().train()
+    if torch.cuda.is_available():  # Train on GPU if possible
         model = model.cuda()
 
     loss_func = partial(torch.nn.functional.huber_loss, delta=0.02)
