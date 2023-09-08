@@ -3,9 +3,9 @@ from torch import nn
 
 
 class LSTMStocksModule(nn.Module):
-    HIDDEN_SIZE = 2
-    NUM_LAYERS = 1
-    BIAS = True
+    HIDDEN_SIZE = 2  # Number of LSTM hidden nodes
+    NUM_LAYERS = 1  # Number of LSTM layers
+    BIAS = True  # Whether to include the bias term for some of LSTM's equations
 
     def __init__(self):
         super(LSTMStocksModule, self).__init__()

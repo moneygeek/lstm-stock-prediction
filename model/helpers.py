@@ -30,6 +30,10 @@ def _draw_chart(y_series: pd.Series):
 
 
 def chart_y_histogram(y_series: pd.Series):
+    """
+    Create charts that contain the histogram of the inputs and compares them against Normal distributions.
+    :param y_series: Data to create charts for.
+    """
     _draw_chart(y_series)
     plt.show()
 
@@ -40,6 +44,13 @@ def chart_y_histogram(y_series: pd.Series):
 
 
 def train(x_series: pd.Series, y_series: pd.Series, epochs: int = 100):
+    """
+    Trains the LSTMStocksModule model
+    :param x_series: Inputs consisting of sequences of stock price returns
+    :param y_series: Targets consisting of returns some days in advance of the reference dates
+    :param epochs: Number of complete iterations to go through the data in order to train
+    :return: The trained LSTMStocksModule model
+    """
     # Put data into GPU if possible
     dataloader_kwargs = {}
     if torch.cuda.is_available():
@@ -51,6 +62,7 @@ def train(x_series: pd.Series, y_series: pd.Series, epochs: int = 100):
     # Turn pandas objects into Pytorch tensor objects
     x_tensor, y_tensor = torch.tensor(x_series.values).float(), torch.tensor(y_series.values).float()
 
+    # Set up the dataloader
     train_dataset = LSTMStocksDataset(x_tensor, y_tensor)
     train_dataloader = DataLoader(train_dataset, batch_size=64, shuffle=True, **dataloader_kwargs)
 
@@ -67,6 +79,7 @@ def train(x_series: pd.Series, y_series: pd.Series, epochs: int = 100):
         weight_decay=WEIGHT_DECAY
     )
 
+    # Conduct training which consists of homing the model in on the best parameters that minimize the loss
     for i in range(epochs):
         total_loss = 0.
         for x, y in train_dataloader:
@@ -82,7 +95,13 @@ def train(x_series: pd.Series, y_series: pd.Series, epochs: int = 100):
     return model
 
 
-def predict(trained_model, x_series: pd.Series):
+def predict(trained_model, x_series: pd.Series) -> pd.Series:
+    """
+    Generates predictions using a trained model
+    :param trained_model: Trained Pytorch model
+    :param x_series: Inputs to generate predictions for
+    :return: Series containing predictions, with reference dates as indices
+    """
     trained_model.eval()
 
     x_tensor = torch.tensor(x_series.values).float()

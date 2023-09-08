@@ -13,9 +13,7 @@ if __name__ == "__main__":
     spy = yf.Ticker("SPY")
     price_series = spy.history(period='max')['Close'].dropna()
 
-    # perf_series = price_series
     perf_series = price_series.pct_change().dropna()
-
     perf_series.loc[perf_series > 0] = 1
     perf_series.loc[perf_series <= 0] = 0
 
@@ -26,17 +24,21 @@ if __name__ == "__main__":
     common_index = x_df.index.intersection(y_series.index)
     x_df, y_series = x_df.loc[common_index], y_series.loc[common_index]
 
+    # Isolate training data
     training_cutoff = datetime.datetime(2020, 1, 1, tzinfo=pytz.timezone('America/New_York'))
     training_x_series = x_df.loc[x_df.index < training_cutoff]
     training_y_series = y_series.loc[y_series.index < training_cutoff]
 
     trained_model = train(training_x_series, training_y_series)
 
+    # Isolate test data
     test_x_series = x_df.loc[x_df.index >= training_cutoff]
-    forecast_series = predict(trained_model, test_x_series)
     actual_series = y_series.loc[y_series.index >= training_cutoff]
+
+    forecast_series = predict(trained_model, test_x_series)
     results_df = forecast_series.to_frame('Forecast').join(actual_series.to_frame('Actual')).dropna()
 
+    # Evaluate forecasts
     results_df.plot.scatter(x='Actual', y='Forecast')
     plt.show()
     print(f"Log Loss: {log_loss(results_df['Actual'], results_df['Forecast']):.4f}, "
