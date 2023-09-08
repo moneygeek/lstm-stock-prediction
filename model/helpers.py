@@ -58,7 +58,7 @@ def train(x_series: pd.Series, y_series: pd.Series, epochs: int = 100):
     if torch.cuda.is_available():  # Train on GPU if possible
         model = model.cuda()
 
-    loss_func = partial(torch.nn.functional.huber_loss, delta=0.02)
+    loss_func = torch.nn.functional.cross_entropy
     chart_y_histogram(y_series)
 
     optimizer = torch.optim.Adam(

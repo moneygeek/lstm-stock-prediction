@@ -1,3 +1,4 @@
+import torch
 from torch import nn
 
 
@@ -23,5 +24,5 @@ class LSTMStocksModule(nn.Module):
         out = hidden.squeeze()
         if self.HIDDEN_SIZE > 1:
             out = self.linear(out).squeeze()
-        return out
+        return torch.sigmoid(out)
 

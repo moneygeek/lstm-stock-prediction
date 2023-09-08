@@ -1,13 +1,12 @@
 import datetime
 
-import pandas as pd
 import pytz as pytz
 import yfinance as yf
-
-from model.preprocessors import process_inputs, process_targets
-from model.helpers import train, predict
 from matplotlib import pyplot as plt
-from sklearn.metrics import r2_score, mean_absolute_error
+from sklearn.metrics import log_loss, accuracy_score
+
+from model.helpers import train, predict
+from model.preprocessors import process_inputs, process_targets
 
 if __name__ == "__main__":
     # Download price histories from Yahoo Finance
@@ -16,9 +15,9 @@ if __name__ == "__main__":
 
     # perf_series = price_series
     perf_series = price_series.pct_change().dropna()
-    perf_series.to_pickle('./perf_series.pkl')
 
-    perf_series = pd.read_pickle('./perf_series.pkl')
+    perf_series.loc[perf_series > 0] = 1
+    perf_series.loc[perf_series <= 0] = 0
 
     x_df = process_inputs(perf_series, window_length=10)
     y_series = process_targets(perf_series)
@@ -40,5 +39,5 @@ if __name__ == "__main__":
 
     results_df.plot.scatter(x='Actual', y='Forecast')
     plt.show()
-    print(f"R Squared: {r2_score(results_df['Actual'], results_df['Forecast']):.4f}, "
-          f"Mean Absolute Error: {mean_absolute_error(results_df['Actual'], results_df['Forecast']):.4f}")
+    print(f"Log Loss: {log_loss(results_df['Actual'], results_df['Forecast']):.4f}, "
+          f"Accuracy: {accuracy_score(results_df['Actual'], results_df['Forecast'].round()):.4f}")
