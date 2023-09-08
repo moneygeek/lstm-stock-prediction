@@ -12,7 +12,7 @@ from scipy.stats import norm
 
 
 LEARNING_RATE = 1e-4
-WEIGHT_DECAY = 1e-6
+WEIGHT_DECAY = 1e-5
 
 
 def _draw_chart(y_series: pd.Series):
@@ -71,7 +71,6 @@ def train(x_series: pd.Series, y_series: pd.Series, epochs: int = 100):
         model = model.cuda()
 
     loss_func = torch.nn.functional.cross_entropy
-    chart_y_histogram(y_series)
 
     optimizer = torch.optim.Adam(
         model.parameters(),

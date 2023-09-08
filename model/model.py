@@ -25,4 +25,3 @@ class LSTMStocksModule(nn.Module):
         if self.HIDDEN_SIZE > 1:
             out = self.linear(out).squeeze()
         return torch.sigmoid(out)
-

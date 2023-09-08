@@ -2,7 +2,6 @@ import datetime
 
 import pytz as pytz
 import yfinance as yf
-from matplotlib import pyplot as plt
 from sklearn.metrics import log_loss, accuracy_score
 
 from model.helpers import train, predict
@@ -14,11 +13,11 @@ if __name__ == "__main__":
     price_series = spy.history(period='max')['Close'].dropna()
 
     perf_series = price_series.pct_change().dropna()
-    perf_series.loc[perf_series > 0] = 1
-    perf_series.loc[perf_series <= 0] = 0
 
     x_df = process_inputs(perf_series, window_length=10)
     y_series = process_targets(perf_series)
+    y_series.loc[y_series > 0] = 1
+    y_series.loc[y_series <= 0] = 0
 
     # Only keep rows in which we have both inputs and data.
     common_index = x_df.index.intersection(y_series.index)
@@ -39,7 +38,5 @@ if __name__ == "__main__":
     results_df = forecast_series.to_frame('Forecast').join(actual_series.to_frame('Actual')).dropna()
 
     # Evaluate forecasts
-    results_df.plot.scatter(x='Actual', y='Forecast')
-    plt.show()
     print(f"Log Loss: {log_loss(results_df['Actual'], results_df['Forecast']):.4f}, "
           f"Accuracy: {accuracy_score(results_df['Actual'], results_df['Forecast'].round()):.4f}")
