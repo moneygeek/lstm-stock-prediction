@@ -95,16 +95,16 @@ def train(x_df: pd.DataFrame, y_series: pd.Series, epochs: int = 100):
     return model
 
 
-def predict(trained_model, x_series: pd.Series) -> pd.Series:
+def predict(trained_model, x_df: pd.DataFrame) -> pd.Series:
     """
     Generates predictions using a trained model
     :param trained_model: Trained Pytorch model
-    :param x_series: Inputs to generate predictions for
+    :param x_df: Inputs to generate predictions for
     :return: Series containing predictions, with reference dates as indices
     """
     trained_model.eval()
 
-    x_tensor = torch.tensor(x_series.values).float()
+    x_tensor = torch.tensor(x_df.values).float()
     prediction = trained_model(x_tensor)
 
-    return pd.Series(prediction.cpu().detach().numpy(), index=x_series.index)
+    return pd.Series(prediction.cpu().detach().numpy(), index=x_df.index)
