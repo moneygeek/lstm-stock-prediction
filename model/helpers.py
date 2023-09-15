@@ -43,10 +43,10 @@ def chart_y_histogram(y_series: pd.Series):
     plt.show()
 
 
-def train(x_series: pd.Series, y_series: pd.Series, epochs: int = 100):
+def train(x_df: pd.DataFrame, y_series: pd.Series, epochs: int = 100):
     """
     Trains the LSTMStocksModule model
-    :param x_series: Inputs consisting of sequences of stock price returns
+    :param x_df: Inputs consisting of sequences of stock price returns
     :param y_series: Targets consisting of returns some days in advance of the reference dates
     :param epochs: Number of complete iterations to go through the data in order to train
     :return: The trained LSTMStocksModule model
@@ -60,7 +60,7 @@ def train(x_series: pd.Series, y_series: pd.Series, epochs: int = 100):
         torch.set_default_tensor_type('torch.FloatTensor')
 
     # Turn pandas objects into Pytorch tensor objects
-    x_tensor, y_tensor = torch.tensor(x_series.values).float(), torch.tensor(y_series.values).float()
+    x_tensor, y_tensor = torch.tensor(x_df.values).float(), torch.tensor(y_series.values).float()
 
     # Set up the dataloader
     train_dataset = LSTMStocksDataset(x_tensor, y_tensor)
